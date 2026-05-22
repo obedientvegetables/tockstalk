@@ -1,0 +1,28 @@
+name: Manual Booking
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'GitHub Environment name (which CYPRESS_ENV secret to use)'
+        required: true
+        default: 'alchemist'
+
+jobs:
+  attempt_booking:
+    name: Attempt Booking
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Write cypress.env.json from secret
+        run: echo '${{ secrets.CYPRESS_ENV }}' > cypress.env.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Run booking attempt
+        run: npm test
